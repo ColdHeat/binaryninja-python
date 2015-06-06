@@ -304,7 +304,7 @@ class MainWindow(QMainWindow):
 		about = AboutDialog()
 		about.exec_()
 
-	def create_tab(self, data, filename, forced_view = None):
+	def create_tab(self, data, filename, forced_view=None):
 		# Pick the view with the highest priority
 		best = None
 		bestScore = -1
@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
 
 	def dropEvent(self, event):
 		for i in event.mimeData().urls():
-			if (sys.platform=="darwin" and (i.toLocalFile().find('/.file/id=') == 0)):
+			if sys.platform == "darwin" and i.toLocalFile().find('/.file/id=') == 0:
 				try:
 					from Foundation import NSURL
 				except ImportError:
@@ -353,7 +353,7 @@ class MainWindow(QMainWindow):
 				url = NSURL.URLWithString_(i.toString()).path()
 				self.open_name(str(url))
 			else:
-				if (not i.isLocalFile()):
+				if not i.isLocalFile():
 					return
 				self.open_name(i.toLocalFile())
 		event.accept()

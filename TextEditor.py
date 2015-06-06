@@ -52,9 +52,10 @@ HTML = """
 """
 
 class Editor(QObject):
-    def __init__(self, filePath ,parent=None):
+    def __init__(self, data, filePath ,parent=None):
         super(Editor,self).__init__(parent)
         self.filePath = filePath
+        self.data = data
         if self.filePath:
             fileInfo = QFileInfo(self.filePath)
             inFile = QFile(self.filePath)
@@ -66,13 +67,20 @@ class Editor(QObject):
             print ab_path
         else:
             filename = "New File"
-            text = ""
+            text = self.data
         self.text = text
         self.filename = filename
     @Slot(result=str)
     def content(self):
         return self.text
 
+class Bridge(QObject):
+    def __init__(self, parent=None):
+        super(Bridge, self).__init__(parent)
+
+    @Slot(str)
+    def msg(self, message):
+        print message
 
 class TextEditor(QWebView):
     def __init__(self, data, filename, view, parent):
@@ -82,17 +90,31 @@ class TextEditor(QWebView):
         self.data = data
         self.view = view
         self.settings().setAttribute(QWebSettings.WebAttribute.DeveloperExtrasEnabled, True)
+        self.status = "Cursor: Line %d, Col %d, Offset 0x%.8x" % (1, 1, self.data.start())
 
         # Set contents
-        editor = Editor(self.filename)
-        frame = self.page().mainFrame()
-        frame.addToJavaScriptWindowObject('editor', editor)
+        editor = Editor(self.data, self.filename)
+        self.frame = self.page().mainFrame()
+        self.frame.addToJavaScriptWindowObject('editor', editor)
+
+        bridge = Bridge()
+        self.frame.addToJavaScriptWindowObject('bridge', bridge)
+
         self.inspect = QWebInspector()
         self.inspect.setPage(self.page())
         self.setHtml(HTML)
 
+    def eval_js(self, code):
+        return self.frame.evaluateJavaScript(code)
+
+    def getText(self):
+        return self.eval_js('e.getValue();')
+
     def closeRequest(self):
         return True
+
+    def get_cursor_pos(self):
+        return self.eval_js('e.getCursorPosition();')
 
     def getPriority(data, filename):
         ext = os.path.splitext(filename)[1].lower()
@@ -106,6 +128,22 @@ class TextEditor(QWebView):
         return 0
     getPriority = staticmethod(getPriority)
 
+
+    ## EDIT EVENTS
+    def selectAll(self):
+        self.eval_js("e.selectAll();")
+
+    def cut(self):
+        pass
+
+    def copy(self):
+        pass
+
+    def paste(self):
+        pass
+
+    def find(self):
+        self.eval_js('e.execCommand("find");')
 
     def getViewName():
         return "Text Editor"

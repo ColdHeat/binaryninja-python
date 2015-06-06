@@ -257,7 +257,7 @@ class RemoveUndoEntry:
 
 
 class BinaryData(BinaryAccessor):
-	def __init__(self, data = ""):
+	def __init__(self, data=""):
 		self.data = data
 		self.modification = [DATA_ORIGINAL] * len(data)
 		self.modified = False
