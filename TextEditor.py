@@ -45,6 +45,7 @@ HTML = """
         e.getSession().setMode("ace/mode/python");
         e.setValue(editor.content());
         console.log(editor.content())
+        e.on('change', function(change){editor.change(e.getValue())});
     </script>
 </body>
 
@@ -70,17 +71,17 @@ class Editor(QObject):
             text = self.data
         self.text = text
         self.filename = filename
+
     @Slot(result=str)
     def content(self):
         return self.text
 
-class Bridge(QObject):
-    def __init__(self, parent=None):
-        super(Bridge, self).__init__(parent)
-
     @Slot(str)
-    def msg(self, message):
-        print message
+    def change(self, text):
+        if text != self.data.data:
+            self.data.data = text
+            self.data.modified = True
+
 
 class TextEditor(QWebView):
     def __init__(self, data, filename, view, parent):
@@ -93,12 +94,9 @@ class TextEditor(QWebView):
         self.status = "Cursor: Line %d, Col %d, Offset 0x%.8x" % (1, 1, self.data.start())
 
         # Set contents
-        editor = Editor(self.data, self.filename)
+        self.editor = Editor(self.data, self.filename)
         self.frame = self.page().mainFrame()
-        self.frame.addToJavaScriptWindowObject('editor', editor)
-
-        bridge = Bridge()
-        self.frame.addToJavaScriptWindowObject('bridge', bridge)
+        self.frame.addToJavaScriptWindowObject('editor', self.editor)
 
         self.inspect = QWebInspector()
         self.inspect.setPage(self.page())
@@ -128,19 +126,46 @@ class TextEditor(QWebView):
         return 0
     getPriority = staticmethod(getPriority)
 
+    def format_binary_string(self, data):
+        return data
 
-    ## EDIT EVENTS
+    @staticmethod
+    def write_to_clipboard(data):
+        clipboard = QApplication.clipboard()
+        clipboard.clear()
+        mime = QMimeData()
+        mime.setText(data)
+        clipboard.setMimeData(mime)
+        return True
+
     def selectAll(self):
         self.eval_js("e.selectAll();")
 
     def cut(self):
-        pass
+        self.write_to_clipboard(self.eval_js('e.getCopyText();'))
+        self.eval_js('e.insert("");')
 
     def copy(self):
-        pass
+        self.write_to_clipboard(self.eval_js('e.getCopyText();'))
 
     def paste(self):
-        pass
+        # Get clipboard contents
+        clipboard = QApplication.clipboard()
+        mime = clipboard.mimeData()
+        binary = False
+        if mime.hasFormat("application/octet-stream"):
+            data = mime.data("application/octet-stream").data()
+            binary = True
+        elif mime.hasText():
+            data = mime.text().encode("utf8")
+        else:
+            QMessageBox.critical(self, "Error", "Clipboard is empty or does not have valid contents")
+            return
+
+        if binary:
+            data = self.format_binary_string(data)
+        # TODO: Try to make this better somehow
+        self.eval_js("e.insert(" + repr(data) + ");")
 
     def find(self):
         self.eval_js('e.execCommand("find");')

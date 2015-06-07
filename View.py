@@ -245,7 +245,7 @@ class ViewFrame(QWidget):
 		self.undo_location = self.get_history_entry()
 
 	def commit_undo(self):
-                self.data.commit_undo(self.undo_location, self.get_history_entry())
+		self.data.commit_undo(self.undo_location, self.get_history_entry())
 
 	def undo(self):
 		# Ensure any pending undo actions are accounted for
