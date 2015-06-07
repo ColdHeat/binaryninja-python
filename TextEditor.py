@@ -42,6 +42,17 @@ class Editor(QObject):
 	def get_filename(self):
 		return self.filename
 
+	@Slot(result=str)
+	def get_font(self):
+		if sys.platform == 'darwin':
+			font_list = "\"Monaco\", Monospace"
+		elif sys.platform.find('linux') != -1:
+			font_list = "Monospace"
+		elif sys.platform.find('freebsd') != -1:
+			font_list = "\"Bitstream Vera Sans Mono\", Monospace"
+		else:
+			font_list = "\"Consolas\", \"Lucida Console\", Monospace"
+		return font_list
 
 class TextEditor(QWebView):
 	def __init__(self, data, filename, view, parent):

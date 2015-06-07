@@ -7,11 +7,6 @@
 		body {
 			margin: 0;
 			padding: 0;
-			font-family: 'Consolas'
-		}
-
-		pre.ace_editor {
-			font-family: 'Consolas'
 		}
 
 		#editor {
@@ -36,6 +31,10 @@
 		e.setTheme("ace/theme/ambiance");
 		e.setValue(editor.content());
 		e.on('change', function(change){editor.change(e.getValue())});
+
+		function set_font(){
+			document.querySelector('pre.ace_editor').style.fontFamily = editor.get_font();
+		}
 
 		function set_highlight(){
 			var mode = modelist.getModeForPath(editor.get_filename()).mode;
