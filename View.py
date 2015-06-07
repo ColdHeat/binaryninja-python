@@ -251,21 +251,27 @@ class ViewFrame(QWidget):
 		# Ensure any pending undo actions are accounted for
 		self.commit_undo()
 
-		entry = self.data.undo()
-		if entry:
-			self.setViewType(entry.type)
-			if entry.data != None:
-				self.view.navigate_to_history_entry(entry.data)
+		try:
+			self.view.undo()
+		except AttributeError:
+			entry = self.data.undo()
+			if entry:
+				self.setViewType(entry.type)
+				if entry.data != None:
+					self.view.navigate_to_history_entry(entry.data)
 
 	def redo(self):
 		# Ensure any pending undo actions are accounted for
 		self.commit_undo()
 
-		entry = self.data.redo()
-		if entry:
-			self.setViewType(entry.type)
-			if entry.data != None:
-				self.view.navigate_to_history_entry(entry.data)
+		try:
+			self.view.redo()
+		except AttributeError:
+			entry = self.data.redo()
+			if entry:
+				self.setViewType(entry.type)
+				if entry.data != None:
+					self.view.navigate_to_history_entry(entry.data)
 
 	def toggle_python_console(self):
 		if self.python_console:
