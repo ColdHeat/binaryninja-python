@@ -109,9 +109,10 @@ class MainWindow(QMainWindow):
 		new_menu = self.fileMenu.addMenu("&New")
 		new_binary_action = new_menu.addAction("&Binary data", self.new)
 		new_binary_action.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_N))
-		for name in highlightNames:
-			cls = highlightTypes[name]
-			new_menu.addAction(name, self.create_new_callback(cls))
+		# for name in highlightNames:
+		# 	cls = highlightTypes[name]
+		# 	new_menu.addAction(name, self.create_new_callback(cls))
+		new_menu.addAction("Text file", self.create_new_callback(None))
 		open_action = self.fileMenu.addAction("&Open...", self.open)
 		open_action.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_O))
 		save_action = self.fileMenu.addAction("&Save", self.save)
@@ -362,7 +363,7 @@ class MainWindow(QMainWindow):
 		self.create_tab(BinaryData(), "")
 
 	def new_text(self, cls):
-		self.create_tab(BinaryData(), "", TextEditor).view.set_highlight_type(cls)
+		self.create_tab(BinaryData(), "", TextEditor)
 
 	def create_new_callback(self, cls):
 		return lambda: self.new_text(cls)

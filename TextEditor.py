@@ -6,55 +6,9 @@ from PySide.QtWebKit import *
 from PySide.QtNetwork import *
 from View import *
 
-HTML = """
-<!DOCTYPE html>
-<html>
-
-<head>
-	<style>
-		html,
-		body {
-			margin: 0;
-			padding: 0;
-			font-family: 'Consolas'
-		}
-
-		pre.ace_editor {
-			font-family: 'Consolas'
-		}
-
-		#editor {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			margin: 0;
-		}
-	</style>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.1.9/ace.js"></script>
-</head>
-
-<body>
-	<pre id="editor">
-
-</pre>
-	<script type="text/javascript">
-		var e = ace.edit("editor");
-		e.$blockScrolling = Infinity
-		e.setTheme("ace/theme/monokai");
-		e.getSession().setMode("ace/mode/python");
-		e.setValue(editor.content());
-		console.log(editor.content())
-		e.on('change', function(change){editor.change(e.getValue())});
-	</script>
-</body>
-
-</html>
-"""
-
-EXTENSIONS = ['.py', '.c', '.cpp', '.js', '.txt', '.md', '.rb', '.ruby', '.sh', '.html', '.css', '.php', '.json',
-			  '.yaml', '.yml', '.bat']
+EXTENSIONS = {'.py':'python', '.c':'c_cpp', '.cpp':'c_cpp', '.js':'javascript', '.txt':'none', '.md':'markdown',
+			'.rb':'ruby', '.ruby':'ruby', '.sh':'sh', '.html':'html', '.css':'css', '.php':'php', '.json':'json',
+			'.yaml':'yaml', '.yml':'yaml', '.bat':'batchfile'}
 
 class Editor(QObject):
 	def __init__(self, data, filePath ,parent=None):
@@ -66,10 +20,8 @@ class Editor(QObject):
 			inFile = QFile(self.filePath)
 			if inFile.open(QFile.ReadOnly | QFile.Text):
 				text = str(inFile.readAll())
-				print text
 			ab_path = fileInfo.absoluteFilePath()
 			filename = fileInfo.fileName()
-			print ab_path
 		else:
 			filename = "New File"
 			text = self.data
@@ -85,6 +37,10 @@ class Editor(QObject):
 		if text != self.data.data:
 			self.data.data = text
 			self.data.modified = True
+
+	@Slot(result=str)
+	def get_filename(self):
+		return self.filename
 
 
 class TextEditor(QWebView):
@@ -104,7 +60,10 @@ class TextEditor(QWebView):
 
 		self.inspect = QWebInspector()
 		self.inspect.setPage(self.page())
-		self.setHtml(HTML)
+		self.load('ace/ace.html')
+
+	def set_highlight_type(self, ext):
+		self.eval_js('set_highlight("'+ext+'")')
 
 	def eval_js(self, code):
 		return self.frame.evaluateJavaScript(code)
@@ -186,7 +145,6 @@ class TextEditor(QWebView):
 	def getViewName():
 		return "Text Editor"
 	getViewName = staticmethod(getViewName)
-
 
 	def getShortViewName():
 		return "Text"

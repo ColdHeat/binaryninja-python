@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: 'Consolas'
+		}
+
+		pre.ace_editor {
+			font-family: 'Consolas'
+		}
+
+		#editor {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			margin: 0;
+		}
+	</style>
+	<script type="text/javascript" src="ace.js"></script>
+	<script type="text/javascript" src="ext-modelist.js"></script>
+</head>
+
+<body>
+	<pre id="editor"></pre>
+	<script type="text/javascript">
+		var modelist = ace.require("ace/ext/modelist");
+		var e = ace.edit("editor");
+		e.$blockScrolling = Infinity
+		e.setTheme("ace/theme/ambiance");
+		e.setValue(editor.content());
+		e.on('change', function(change){editor.change(e.getValue())});
+
+		function set_highlight(){
+			var mode = modelist.getModeForPath(editor.get_filename()).mode;
+			console.log(mode);
+			e.session.setMode(mode);
+		}
+
+		set_highlight();
+	</script>
+</body>
+
+</html>
