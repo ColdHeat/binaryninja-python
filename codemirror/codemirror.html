@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CodeMirror Test</title>
+    <link rel="stylesheet" type="text/css" href="codemirror.css">
+    <link rel="stylesheet" type="text/css" href="theme/monokai.css">
+    <link rel="stylesheet" type="text/css" href="addon/dialog/dialog.css">
+    <link rel="stylesheet" type="text/css" href="addon/fold/foldgutter.css" />
+    <style type="text/css">
+    body{
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+    .CodeMirror {
+           width: 100% !important;
+           height: 100% !important;
+    }
+    </style>
+    <script src="jquery-2.1.4.min.js"></script>
+    <script src="codemirror.js"></script>
+    <script src="addon/dialog/dialog.js"></script>
+    <script src="addon/search/searchcursor.js"></script>
+    <script src="addon/search/search.js"></script>
+    <script src="addon/scroll/annotatescrollbar.js"></script>
+    <script src="addon/search/matchesonscrollbar.js"></script>
+</head>
+<body>
+
+</body>
+<script>
+    var e = null;
+    function load(){
+        console.log(editor.get_mode());
+        if(editor.get_mode()) {
+            $.getScript('mode/' + editor.get_mode() + '.js', function (data) {
+                var options = {
+                    value: editor.content(),
+                    lineNumbers: true,
+                    theme: 'monokai',
+                    mode: editor.get_mode(),
+                    foldGutter: true,
+                    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+                };
+                e = CodeMirror(document.body, options);
+                e.on('change', function (cm, change) {
+                    editor.change(cm.getValue());
+                });
+            });
+            return editor.get_mode();
+        }
+        else {
+            console.log('new file')
+            var options = {
+                value: "",
+                lineNumbers: true,
+                theme: 'monokai',
+                foldGutter: true,
+                gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
+            };
+            e = CodeMirror(document.body, options);
+            e.on('change', function (cm, change) {
+                editor.change(cm.getValue());
+            });
+            return false;
+        }
+    }
+    var mode = load();
+</script>
+</html>

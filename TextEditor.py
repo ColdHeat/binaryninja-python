@@ -6,9 +6,8 @@ from PySide.QtWebKit import *
 from PySide.QtNetwork import *
 from View import *
 
-EXTENSIONS = {'.py':'python', '.c':'c_cpp', '.cpp':'c_cpp', '.js':'javascript', '.txt':'none', '.md':'markdown',
-			'.rb':'ruby', '.ruby':'ruby', '.sh':'sh', '.html':'html', '.css':'css', '.php':'php', '.json':'json',
-			'.yaml':'yaml', '.yml':'yaml', '.bat':'batchfile'}
+EXTENSIONS = {'.py':'python', '.c':'clike', '.cpp':'clike', '.js':'javascript', '.txt':'none', '.md':'markdown',
+			'.rb':'ruby', '.ruby':'ruby', '.sh':'shell', '.html':'htmlmixed', '.css':'css', '.php':'php'}
 
 class Editor(QObject):
 	def __init__(self, data, filePath ,parent=None):
@@ -39,8 +38,9 @@ class Editor(QObject):
 			self.data.modified = True
 
 	@Slot(result=str)
-	def get_filename(self):
-		return self.filename
+	def get_mode(self):
+		ext = os.path.splitext(self.filePath)[1].lower()
+		return EXTENSIONS.get(ext)
 
 	@Slot(result=str)
 	def get_font(self):
@@ -71,10 +71,12 @@ class TextEditor(QWebView):
 
 		self.inspect = QWebInspector()
 		self.inspect.setPage(self.page())
-		self.load('ace/ace.html')
+		# self.load('ace/ace.html')
+		self.load('codemirror/codemirror.html')
 
 	def set_highlight_type(self, ext):
-		self.eval_js('set_highlight("'+ext+'")')
+		mode = EXTENSIONS[ext]
+		self.eval_js('set_mode("'+mode+'")')
 
 	def eval_js(self, code):
 		return self.frame.evaluateJavaScript(code)
@@ -113,23 +115,23 @@ class TextEditor(QWebView):
 		return True
 
 	def undo(self):
-		self.eval_js('e.undo();')
+		self.eval_js('e.execCommand("undo");')
 
 	def redo(self):
-		self.eval_js('e.redo();')
+		self.eval_js('e.execCommand("redo");')
 
 	def selectAll(self):
-		self.eval_js("e.selectAll();")
+		self.eval_js('e.execCommand("selectAll");')
 
 	def selectNone(self):
-		self.eval_js("e.navigateFileEnd();")
+		self.eval_js('e.execCommand("undoSelection")')
 
 	def cut(self):
-		self.write_to_clipboard(self.eval_js('e.getCopyText();'))
-		self.eval_js('e.insert("");')
+		self.copy()
+		self.eval_js('e.replaceSelection("");')
 
 	def copy(self):
-		self.write_to_clipboard(self.eval_js('e.getCopyText();'))
+		self.write_to_clipboard(self.eval_js('e.getSelection();'))
 
 	def paste(self):
 		# Get clipboard contents
@@ -148,7 +150,7 @@ class TextEditor(QWebView):
 		if binary:
 			data = self.format_binary_string(data)
 		# TODO: Try to make this better somehow
-		self.eval_js("e.insert(" + repr(data) + ");")
+		self.eval_js("e.replaceSelection(" + repr(data) + ");")
 
 	def find(self):
 		self.eval_js('e.execCommand("find");')
