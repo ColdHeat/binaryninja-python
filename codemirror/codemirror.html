@@ -4,6 +4,7 @@
     <title>CodeMirror Test</title>
     <link rel="stylesheet" type="text/css" href="codemirror.css">
     <link rel="stylesheet" type="text/css" href="theme/monokai.css">
+    <link rel="stylesheet" type="text/css" href="theme/pastel-on-dark.css">
     <link rel="stylesheet" type="text/css" href="addon/dialog/dialog.css">
     <link rel="stylesheet" type="text/css" href="addon/fold/foldgutter.css" />
     <style type="text/css">
@@ -28,6 +29,7 @@
     <script src="addon/search/search.js"></script>
     <script src="addon/scroll/annotatescrollbar.js"></script>
     <script src="addon/search/matchesonscrollbar.js"></script>
+    <script src="addon/selection/active-line.js"></script>
 </head>
 <body>
 
@@ -36,38 +38,30 @@
     var e = null;
     function load(){
         console.log(editor.get_mode());
-        if(editor.get_mode()) {
-            $.getScript('mode/' + editor.get_mode() + '.js', function (data) {
-                var options = {
-                    value: editor.content(),
-                    lineNumbers: true,
-                    theme: 'monokai',
-                    mode: editor.get_mode(),
-                    foldGutter: true,
-                    gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-                };
+        var options = {
+            value: "",
+            lineNumbers: true,
+            theme: 'pastel-on-dark',
+            styleActiveLine: true
+        };
+
+        $.getScript('mode/' + editor.get_mode() + '.js')
+            .done(function (data) {
+                options['value'] = editor.content();
+                options['mode'] = editor.get_mode();
                 e = CodeMirror(document.body, options);
                 e.on('change', function (cm, change) {
                     editor.change(cm.getValue());
                 });
+                document.querySelector('.CodeMirror').style.fontFamily = editor.get_font();
+            })
+            .fail(function(){
+                e = CodeMirror(document.body, options);
+                e.on('change', function (cm, change) {
+                    editor.change(cm.getValue());
+                });
+                document.querySelector('.CodeMirror').style.fontFamily = editor.get_font();
             });
-            return editor.get_mode();
-        }
-        else {
-            console.log('new file')
-            var options = {
-                value: "",
-                lineNumbers: true,
-                theme: 'monokai',
-                foldGutter: true,
-                gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
-            };
-            e = CodeMirror(document.body, options);
-            e.on('change', function (cm, change) {
-                editor.change(cm.getValue());
-            });
-            return false;
-        }
     }
     var mode = load();
 </script>
