@@ -20,6 +20,7 @@
     </style>
     <script src="jquery-2.1.4.min.js"></script>
     <script src="codemirror.js"></script>
+    <script src="keymap/sublime.js"></script>
     <script src="addon/dialog/dialog.js"></script>
     <script src="addon/search/searchcursor.js"></script>
     <script src="addon/search/search.js"></script>
@@ -38,7 +39,8 @@
             value: "",
             lineNumbers: true,
             theme: 'pastel-on-dark',
-            styleActiveLine: true
+            styleActiveLine: true,
+            keyMap: "sublime"
         };
 
         $.getScript('mode/' + editor.get_mode() + '.js')
