@@ -66,11 +66,14 @@ class TerminalProcess:
 					os.environ["TERM"] = "xterm-256color"
 					if "PYTHONPATH" in os.environ:
 						del(os.environ["PYTHONPATH"])
+						os.unsetenv('PYTHONPATH')
 					if "LD_LIBRARY_PATH" in os.environ:
 						del(os.environ["LD_LIBRARY_PATH"])
+						os.unsetenv('LD_LIBRARY_PATH')
 					if sys.platform == "darwin":
 						if "DYLD_LIBRARY_PATH" in os.environ:
 							del(os.environ["DYLD_LIBRARY_PATH"])
+							os.unsetenv('DYLD_LIBRARY_PATH')
 
 					retval = subprocess.call(cmd, close_fds=True)
 					os.write(2, "\033[01;34mProcess has completed.\033[00m\n")
