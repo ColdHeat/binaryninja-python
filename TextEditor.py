@@ -1,5 +1,6 @@
 import sys
 import os
+import string
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtWebKit import *
@@ -10,26 +11,18 @@ EXTENSIONS = {'.py':'python', '.c':'clike', '.cpp':'clike', '.js':'javascript', 
 			'.rb':'ruby', '.ruby':'ruby', '.sh':'shell', '.html':'htmlmixed', '.css':'css', '.php':'php'}
 
 class Editor(QObject):
-	def __init__(self, data, filePath ,parent=None):
-		super(Editor,self).__init__(parent)
-		self.filePath = filePath
+	def __init__(self, data, filePath, parent=None):
+		super(Editor, self).__init__(parent)
+		self.filename = filePath
 		self.data = data
-		if self.filePath:
-			fileInfo = QFileInfo(self.filePath)
-			inFile = QFile(self.filePath)
-			if inFile.open(QFile.ReadOnly | QFile.Text):
-				text = str(inFile.readAll())
-			ab_path = fileInfo.absoluteFilePath()
-			filename = fileInfo.fileName()
-		else:
-			filename = "New File"
-			text = self.data
-		self.text = text
-		self.filename = filename
 
 	@Slot(result=str)
 	def content(self):
-		return self.text
+		for c in self.data.data:
+			if c not in set(list(string.printable)):
+				return ''.join([c if ord(c) else " " for c in self.data.data])
+		else:
+			return str(self.data.data)
 
 	@Slot(str)
 	def change(self, text):
@@ -39,7 +32,7 @@ class Editor(QObject):
 
 	@Slot(result=str)
 	def get_mode(self):
-		ext = os.path.splitext(self.filePath)[1].lower()
+		ext = os.path.splitext(self.filename)[1].lower()
 		return EXTENSIONS.get(ext)
 
 	@Slot(result=str)
@@ -85,6 +78,7 @@ class TextEditor(QWebView):
 		return self.eval_js('e.getValue();')
 
 	def closeRequest(self):
+		self.close()
 		return True
 
 	def get_cursor_pos(self):

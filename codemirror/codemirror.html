@@ -17,10 +17,6 @@
         left: 0;
         right: 0;
     }
-    .CodeMirror {
-           width: 100% !important;
-           height: 100% !important;
-    }
     </style>
     <script src="jquery-2.1.4.min.js"></script>
     <script src="codemirror.js"></script>
@@ -35,9 +31,9 @@
 
 </body>
 <script>
+    $('<style>.CodeMirror { width: 100% !important; height: 100% !important; font-family: '+editor.get_font()+'; }</style>').appendTo('head');
     var e = null;
     function load(){
-        console.log(editor.get_mode());
         var options = {
             value: "",
             lineNumbers: true,
@@ -53,14 +49,15 @@
                 e.on('change', function (cm, change) {
                     editor.change(cm.getValue());
                 });
-                document.querySelector('.CodeMirror').style.fontFamily = editor.get_font();
             })
             .fail(function(){
+                if (editor.content()){
+                    options['value'] = editor.content();
+                }
                 e = CodeMirror(document.body, options);
                 e.on('change', function (cm, change) {
                     editor.change(cm.getValue());
                 });
-                document.querySelector('.CodeMirror').style.fontFamily = editor.get_font();
             });
     }
     var mode = load();
