@@ -47,6 +47,21 @@ class Editor(QObject):
 			font_list = "\"Consolas\", \"Lucida Console\", Monospace"
 		return font_list
 
+class BinjaWebPage(QWebPage):
+
+	def __init__(self, parent=None):
+		super(BinjaWebPage, self).__init__(parent)
+
+	def userAgentForUrl(self, url):
+		if sys.platform == 'darwin':
+			return "mozilla/5.0 (macintosh; intel mac os x) applewebkit/534.34 (khtml, like gecko) qt/4.8.5 safari/534.34"
+		elif sys.platform.find('linux') != -1:
+			return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.4 Safari/534.34"
+		elif sys.platform.find('freebsd') != -1:
+			return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.4 Safari/534.34"
+		else:
+			return "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.5 Safari/534.34"
+
 class TextEditor(QWebView):
 	def __init__(self, data, filename, view, parent):
 		super(TextEditor, self).__init__(parent)
@@ -57,15 +72,28 @@ class TextEditor(QWebView):
 		self.settings().setAttribute(QWebSettings.WebAttribute.DeveloperExtrasEnabled, True)
 		self.status = "Cursor: Line %d, Col %d, Offset 0x%.8x" % (1, 1, self.data.start())
 
+		page = BinjaWebPage()
+		self.setPage(page)
+
 		# Set contents
 		self.editor = Editor(self.data, self.filename)
 		self.frame = self.page().mainFrame()
 		self.frame.addToJavaScriptWindowObject('editor', self.editor)
 
 		self.inspect = QWebInspector()
-		self.inspect.setPage(self.page())
-		# self.load('ace/ace.html')
+		self.inspect.setPage(page)
+
 		self.load('codemirror/codemirror.html')
+
+	def userAgentForUrl(self, url):
+		if sys.platform == 'darwin':
+			return "mozilla/5.0 (macintosh; intel mac os x) applewebkit/534.34 (khtml, like gecko) qt/4.8.5 safari/534.34"
+		elif sys.platform.find('linux') != -1:
+			return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.4 Safari/534.34"
+		elif sys.platform.find('freebsd') != -1:
+			return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.4 Safari/534.34"
+		else:
+			return "Mozilla/5.0 test (Windows NT 6.2; WOW64) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.5 Safari/534.34"
 
 	def set_highlight_type(self, ext):
 		mode = EXTENSIONS[ext]
