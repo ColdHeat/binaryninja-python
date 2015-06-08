@@ -848,7 +848,7 @@ class MainWindow(QMainWindow):
 		if not self.save_tab(index):
 			return
 		if os.name != "nt":
-			self.focus_tab.widget(index).run_in_terminal(["/usr/bin/env", "python", self.focus_tab.widget(index).filename])
+			self.focus_tab.widget(index).run_in_terminal(["/bin/sh", "-c", "python {}".format(self.focus_tab.widget(index).filename)])
 
 	def python_console_api(self):
 		if sys.executable.lower().find('python') == -1:
