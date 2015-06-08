@@ -54,7 +54,7 @@ class BinjaWebPage(QWebPage):
 
 	def userAgentForUrl(self, url):
 		if sys.platform == 'darwin':
-			return "mozilla/5.0 (macintosh; intel mac os x) applewebkit/534.34 (khtml, like gecko) qt/4.8.5 safari/534.34"
+			return "Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.4 Safari/534.34"
 		elif sys.platform.find('linux') != -1:
 			return "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.4 Safari/534.34"
 		elif sys.platform.find('freebsd') != -1:
