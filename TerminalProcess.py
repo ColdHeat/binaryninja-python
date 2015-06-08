@@ -63,19 +63,15 @@ class TerminalProcess:
 			pid, fd = pty.fork()
 			if pid == 0:
 				try:
-					os.environ["TERM"] = "xterm-256color"
-					if "PYTHONPATH" in os.environ:
-						del(os.environ["PYTHONPATH"])
-						os.unsetenv('PYTHONPATH')
-					if "LD_LIBRARY_PATH" in os.environ:
-						del(os.environ["LD_LIBRARY_PATH"])
-						os.unsetenv('LD_LIBRARY_PATH')
-					if sys.platform == "darwin":
-						if "DYLD_LIBRARY_PATH" in os.environ:
-							del(os.environ["DYLD_LIBRARY_PATH"])
-							os.unsetenv('DYLD_LIBRARY_PATH')
+					copy_env = os.environ.copy()
+					copy_env["TERM"] = "xterm-256color"
 
-					retval = subprocess.call(cmd, close_fds=True)
+					copy_env.pop('PYTHONPATH', None)
+					copy_env.pop('PYTHONHOME', None)
+					copy_env.pop('LD_LIBRARY_PATH', None)
+					copy_env.pop('DYLD_LIBRARY_PATH', None)
+
+					retval = subprocess.call(cmd, close_fds=True, env=copy_env)
 					os.write(2, "\033[01;34mProcess has completed.\033[00m\n")
 					os.write(child_pipe, "t")
 					os._exit(retval)
@@ -199,8 +195,15 @@ class TerminalProcess:
 		pid, fd = pty.fork()
 		if pid == 0:
 			try:
-				os.environ["TERM"] = "xterm-256color"
-				retval = subprocess.call(cmd, close_fds=True)
+				copy_env = os.environ.copy()
+				copy_env["TERM"] = "xterm-256color"
+
+				copy_env.pop('PYTHONPATH', None)
+				copy_env.pop('PYTHONHOME', None)
+				copy_env.pop('LD_LIBRARY_PATH', None)
+				copy_env.pop('DYLD_LIBRARY_PATH', None)
+
+				retval = subprocess.call(cmd, close_fds=True, env=copy_env)
 				os.write(2, "\033[01;34mProcess has completed.\033[00m\n")
 				os.write(child_pipe, "t")
 				os._exit(retval)
