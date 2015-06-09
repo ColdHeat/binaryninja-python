@@ -143,6 +143,7 @@ class TextEditor(QWebView):
 
 	def write(self, data):
 		self.eval_js("e.replaceSelection(\"" + repr(data.encode('string-escape')) + "\");")
+		return True
 
 	def undo(self):
 		self.eval_js('e.execCommand("undo");')
