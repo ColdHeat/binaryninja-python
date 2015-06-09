@@ -1,6 +1,7 @@
 import sys
 import os
 import string
+from collections import Counter
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtWebKit import *
@@ -15,6 +16,7 @@ class Editor(QObject):
 		super(Editor, self).__init__(parent)
 		self.filename = filePath
 		self.data = data
+		self.tabs = self.uses_tabs()
 
 	@Slot(result=str)
 	def content(self):
@@ -46,6 +48,19 @@ class Editor(QObject):
 		else:
 			font_list = "\"Consolas\", \"Lucida Console\", Monospace"
 		return font_list
+
+	@Slot(result=bool)
+	def uses_tabs(self):
+		return self.indent_detect() is "tabs"
+
+	def indent_detect(self):
+		# TODO: Expand and optimize this although str.count is fairly optimized
+		tabs = self.data.data.count('\t')
+		spaces = self.data.data.count('  ')
+		if tabs > spaces:
+			return "tabs"
+		else:
+			return "spaces"
 
 class BinjaWebPage(QWebPage):
 

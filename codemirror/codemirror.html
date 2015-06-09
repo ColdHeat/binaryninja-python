@@ -38,15 +38,30 @@
         var options = {
             value: "",
             lineNumbers: true,
+            autofocus: true,
+            undoDepth: 0,
+            dragDrop: false,
             theme: 'pastel-on-dark',
             styleActiveLine: true,
-            keyMap: "sublime"
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: false,
+            keyMap: "sublime",
+            extraKeys: {
+                "Tab": function (cm) {
+                    if (cm.options.indentWithTabs)
+                        cm.execCommand("insertTab");
+                    else
+                        cm.execCommand("insertSoftTab");
+                }
+            }
         };
 
         $.getScript('mode/' + editor.get_mode() + '.js')
             .done(function (data) {
                 options['value'] = editor.content();
                 options['mode'] = editor.get_mode();
+                options['indentWithTabs'] = editor.uses_tabs();
                 e = CodeMirror(document.body, options);
                 e.on('change', function (cm, change) {
                     editor.change(cm.getValue());
