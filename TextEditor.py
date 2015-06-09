@@ -142,7 +142,7 @@ class TextEditor(QWebView):
 		return True
 
 	def write(self, data):
-		self.eval_js("e.replaceSelection(" + repr(data) + ");")
+		self.eval_js("e.replaceSelection(\"" + repr(data.encode('string-escape')) + "\");")
 
 	def undo(self):
 		self.eval_js('e.execCommand("undo");')
@@ -180,7 +180,7 @@ class TextEditor(QWebView):
 		if binary:
 			data = self.format_binary_string(data)
 		# TODO: Try to make this better somehow
-		self.eval_js("e.replaceSelection(" + repr(data) + ");")
+		self.eval_js("e.replaceSelection(" + repr(data.encode('string-escape')) + ");")
 
 	def find(self):
 		self.eval_js('e.execCommand("find");')
