@@ -16,6 +16,7 @@
 from PySide.QtCore import *
 from PySide.QtGui import *
 from Fonts import *
+from BinaryData import *
 from TextEditor import *
 import nasm
 
