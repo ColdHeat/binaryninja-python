@@ -7,16 +7,19 @@ from PySide.QtGui import *
 from PySide.QtWebKit import *
 from PySide.QtNetwork import *
 from View import *
+from TextLines import *
 
 EXTENSIONS = {'.py':'python', '.c':'clike', '.cpp':'clike', '.js':'javascript', '.txt':'none', '.md':'markdown',
 			'.rb':'ruby', '.ruby':'ruby', '.sh':'shell', '.html':'htmlmixed', '.css':'css', '.php':'php'}
 
 class Editor(QObject):
-	def __init__(self, data, filePath, parent=None):
+	def __init__(self, data, filePath, status=None, parent=None):
 		super(Editor, self).__init__(parent)
 		self.filename = filePath
+		self.text = TextLines(data, 4)
 		self.data = data
 		self.tabs = self.uses_tabs()
+		self.status = status
 
 	@Slot(result=str)
 	def content(self):
@@ -53,6 +56,13 @@ class Editor(QObject):
 	def uses_tabs(self):
 		return self.indent_detect() is "tabs"
 
+	@Slot(int, int, result=bool)
+	def update_status(self, line, column):
+		offset = self.data.start() + self.text.lines[line].offset + column
+		line += 1
+		column += 1
+		self.status("Cursor: Line %d, Col %d, Offset 0x%.8x" % (line, column, offset))
+
 	def indent_detect(self):
 		# TODO: Expand and optimize this although str.count is fairly optimized
 		tabs = self.data.data.count('\t')
@@ -78,6 +88,8 @@ class BinjaWebPage(QWebPage):
 			return "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/534.34 (KHTML, like Gecko) Qt/4.8.5 Safari/534.34"
 
 class TextEditor(QWebView):
+	statusUpdated = Signal(QWidget, name="statusUpdated")
+
 	def __init__(self, data, filename, view, parent):
 		super(TextEditor, self).__init__(parent)
 
@@ -91,7 +103,7 @@ class TextEditor(QWebView):
 		self.status = "Cursor: Line %d, Col %d, Offset 0x%.8x" % (1, 1, self.data.start())
 
 		# Set contents
-		self.editor = Editor(self.data, self.filename)
+		self.editor = Editor(self.data, self.filename, self.update_status)
 		self.frame = self.page().mainFrame()
 		self.frame.addToJavaScriptWindowObject('editor', self.editor)
 
@@ -99,6 +111,10 @@ class TextEditor(QWebView):
 		self.inspect.setPage(self.page())
 
 		self.load('codemirror/codemirror.html')
+
+	def update_status(self, value):
+		self.status = value
+		self.statusUpdated.emit(self)
 
 	def set_highlight_type(self, ext):
 		mode = EXTENSIONS[ext]

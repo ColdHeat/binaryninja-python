@@ -65,6 +65,10 @@
                 e.on('change', function (cm, change) {
                     editor.change(cm.getValue());
                 });
+                e.on('cursorActivity', function (cm) {
+                    var data = cm.getCursor()
+                    editor.update_status(data.line, data.ch);
+                });
             })
             .fail(function(){
                 if (editor.content()){
@@ -73,6 +77,10 @@
                 e = CodeMirror(document.body, options);
                 e.on('change', function (cm, change) {
                     editor.change(cm.getValue());
+                });
+                e.on('cursorActivity', function (cm) {
+                    var data = cm.getCursor()
+                    editor.update_status(data.line, data.ch);
                 });
             });
     }
